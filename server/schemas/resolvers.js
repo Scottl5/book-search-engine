@@ -52,13 +52,16 @@ const resolvers = {
       }
       throw new AuthenicationError("Please sign in before saving a book");
     },
-    deleteBook: async (parent, { user, bookId }, context) => {
-      const deletedBook = await User.findOneAndUpdate(
-        { _id: user._id },
-        { $pull: { savedBooks: { bookId: bookId } } },
-        { new: true }
-      );
-      return deletedBook;
+    deleteBook: async (parent, { bookId }, context) => {
+      if (context.user) {
+        const deletedBook = await User.findOneAndUpdate(
+          { _id: context.user._id },
+          { $pull: { savedBooks: { bookId: bookId } } },
+          { new: true }
+        );
+        return deletedBook;
+      }
+      throw new AuthenicationError("Please sign in before removing a book");
     },
   },
 };
