@@ -41,18 +41,21 @@ const resolvers = {
 
       return { token, user };
     },
-    addBook: async (parent, { user, body }, context) => {
-      const addedBook = await User.findOneAndUpdate(
-        { _id: user._id },
-        { $addToSet: { bookAdd: body } },
-        { new: true, runValidators: true }
-      );
-      return addedBook;
+    saveBook: async (parent, args, context) => {
+      if (context.user) {
+        const addedBook = await User.findByIdAndUpdate(
+          { _id: context.user._id },
+          { $addToSet: { savedBooks: args.input } },
+          { new: true, runValidators: true }
+        );
+        return addedBook;
+      }
+      throw new AuthenicationError("Please sign in before saving a book");
     },
     deleteBook: async (parent, { user, bookId }, context) => {
       const deletedBook = await User.findOneAndUpdate(
         { _id: user._id },
-        { $pull: { bookDelete: { bookId: bookId } } },
+        { $pull: { savedBooks: { bookId: bookId } } },
         { new: true }
       );
       return deletedBook;
